@@ -1,44 +1,28 @@
-import os
 import discord
 from discord.ext import commands
 from discord import app_commands
+import os
+from web import keep_alive
 
-from flask import Flask
-from threading import Thread
-
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "Bot is alive!"
-
-def run():
-    app.run(host='0.0.0.0', port=10000)
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 intents = discord.Intents.default()
-intents.message_content = True
-
-class MyBot(commands.Bot):
-    def __init__(self):
-        super().__init__(command_prefix="!", intents=intents)
-        self.tree = app_commands.CommandTree(self)
-
-    async def setup_hook(self):
-        await self.tree.sync()
-
-bot = MyBot()
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"✅ Bot is online as {bot.user}")
+    print(f"Bot is ready. Logged in as {bot.user}")
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} command(s).")
+    except Exception as e:
+        print(e)
 
-@bot.tree.command(name="ping", description="Replies with Pong!")
+@bot.tree.command(name="ping", description="Check if the bot is alive.")
 async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message("Pong!")
+    await interaction.response.send_message("🏓 Pong! I'm alive.")
 
+# Start FastAPI web server to keep Railway project alive
 keep_alive()
-bot.run(os.getenv("TOKEN"))
+
+bot.run(TOKEN)
