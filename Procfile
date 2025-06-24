@@ -1,1 +1,3 @@
-web: python main.py
+discord.py==2.3.2
+fastapi
+uvicorn
