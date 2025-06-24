@@ -1,3 +1,1 @@
-discord.py==2.3.2
-fastapi
-uvicorn
+worker: python3 main.py
